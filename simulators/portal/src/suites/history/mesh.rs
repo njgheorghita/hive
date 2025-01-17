@@ -3,14 +3,12 @@ use ethportal_api::jsonrpsee::core::__reexports::serde_json;
 use ethportal_api::types::distance::{Metric, XorMetric};
 use ethportal_api::types::portal::FindContentInfo;
 use ethportal_api::{Discv5ApiClient, HistoryContentKey, HistoryNetworkApiClient};
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use itertools::Itertools;
 use serde_json::json;
 use std::collections::HashMap;
 use std::str::FromStr;
-
-use crate::suites::history::constants::TRIN_BRIDGE_CLIENT_TYPE;
 
 // Header with proof for block number 14764013
 const HEADER_WITH_PROOF_KEY: &str =
@@ -24,8 +22,7 @@ dyn_async! {
    pub async fn test_portal_history_mesh<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        // todo: remove this once we implement role in hivesim-rs
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         let private_key_1 = "fc34e57cc83ed45aae140152fd84e2c21d1f4d46e19452e13acc7ee90daa5bac".to_string();
         let private_key_2 = "e5add57dc4c9ef382509e61ce106ec86f60eb73bbfe326b00f54bf8e1819ba11".to_string();

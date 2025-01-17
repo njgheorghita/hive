@@ -1,8 +1,5 @@
 pub const TEST_DATA_FILE_PATH: &str = "./test-data/state_test_data.yaml";
 
-// trin-bridge constants
-pub const TRIN_BRIDGE_CLIENT_TYPE: &str = "trin-bridge";
-
 // Account Trie Node https://github.com/ethereum/portal-spec-tests/blob/master/tests/mainnet/state/validation/account_trie_node.yaml
 pub const CONTENT_KEY: &str =
     "0x20240000000ad14c73a3b489e9cb1c523aef684ed17363e03d33345f2b23c0407f87ee3ff000a97f";

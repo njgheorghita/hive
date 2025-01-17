@@ -1,11 +1,10 @@
 use std::str::FromStr;
 
-use crate::suites::history::constants::TRIN_BRIDGE_CLIENT_TYPE;
 use alloy_primitives::Bytes;
 use ethportal_api::types::enr::generate_random_remote_enr;
 use ethportal_api::Discv5ApiClient;
 use ethportal_api::{HistoryContentKey, HistoryNetworkApiClient};
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use serde_json::json;
 
@@ -17,8 +16,7 @@ dyn_async! {
     pub async fn run_rpc_compat_history_test_suite<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        // todo: remove this once we implement role in hivesim-rs
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         // Test single type of client
         for client in &clients {

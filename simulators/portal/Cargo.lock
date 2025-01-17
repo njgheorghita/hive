@@ -1805,7 +1805,6 @@ checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
 [[package]]
 name = "hivesim"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/ethereum/hive?rev=4408fc1de3fee3ac23acd25a812c117756af2f39#4408fc1de3fee3ac23acd25a812c117756af2f39"
 dependencies = [
  "async-trait",
  "dyn-clone",

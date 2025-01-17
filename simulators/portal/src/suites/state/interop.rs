@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::suites::environment::PortalNetwork;
-use crate::suites::state::constants::{CONTENT_KEY, TEST_DATA_FILE_PATH, TRIN_BRIDGE_CLIENT_TYPE};
+use crate::suites::state::constants::{CONTENT_KEY, TEST_DATA_FILE_PATH};
 use alloy_primitives::Bytes;
 use alloy_rlp::Decodable;
 use ethportal_api::jsonrpsee::http_client::HttpClient;
@@ -16,7 +16,7 @@ use ethportal_api::{
     ContentValue, Discv5ApiClient, Header, HistoryContentKey, HistoryContentValue, StateContentKey,
     StateContentValue, StateNetworkApiClient,
 };
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use itertools::Itertools;
 use serde_json::json;
@@ -95,8 +95,7 @@ dyn_async! {
    pub async fn test_portal_state_interop<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        // todo: remove this once we implement role in hivesim-rs
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         let environment = Some(HashMap::from([PortalNetwork::as_environment_flag([PortalNetwork::State, PortalNetwork::History])]));
         let environments = Some(vec![environment.clone(), environment]);

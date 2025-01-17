@@ -8,7 +8,7 @@ use ethportal_api::ContentValue;
 use ethportal_api::HistoryContentKey;
 use ethportal_api::HistoryContentValue;
 use ethportal_api::{Discv5ApiClient, HistoryNetworkApiClient};
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use serde_yaml::Value;
 use std::collections::HashMap;
@@ -49,10 +49,10 @@ dyn_async! {
    pub async fn test_portal_bridge<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        if !clients.iter().any(|client_definition| client_definition.name == *TRIN_BRIDGE_CLIENT_TYPE) {
-            panic!("This simulator is required to be ran with client `trin-bridge`")
+        if !clients.iter().any(|client| matches!(client.role, Role::HistoryBridge)) {
+            panic!("This simulator is required to be ran with client `trin-history-bridge`")
         }
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         // Iterate over all possible pairings of clients and run the tests (including self-pairings)
         for client in &clients {
@@ -82,7 +82,7 @@ dyn_async! {
             Ok(node_info) => node_info.enr,
             Err(err) => panic!("Error getting node info: {err:?}"),
         };
-        client.test.start_client(TRIN_BRIDGE_CLIENT_TYPE.to_string(), Some(HashMap::from([(BOOTNODES_ENVIRONMENT_VARIABLE.to_string(), client_enr.to_base64()), (HIVE_CHECK_LIVE_PORT.to_string(), 0.to_string())]))).await;
+        client.test.start_client(TRIN_BRIDGE_CLIENT_TYPE.to_string(), Role::HistoryBridge, Some(HashMap::from([(BOOTNODES_ENVIRONMENT_VARIABLE.to_string(), client_enr.to_base64()), (HIVE_CHECK_LIVE_PORT.to_string(), 0.to_string())]))).await;
 
         // With default node settings nodes should be storing all content
         let values = std::fs::read_to_string(TEST_DATA_FILE_PATH)

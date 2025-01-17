@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
-use crate::suites::beacon::constants::{TEST_DATA_FILE_PATH, TRIN_BRIDGE_CLIENT_TYPE};
+use crate::suites::beacon::constants::TEST_DATA_FILE_PATH;
 use crate::suites::environment::PortalNetwork;
 use alloy_primitives::Bytes;
 use ethportal_api::types::portal::{FindContentInfo, GetContentInfo};
@@ -10,7 +10,7 @@ use ethportal_api::utils::bytes::hex_encode;
 use ethportal_api::{
     BeaconContentKey, BeaconContentValue, BeaconNetworkApiClient, ContentValue, Discv5ApiClient,
 };
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use itertools::Itertools;
 use serde_json::json;
@@ -73,8 +73,7 @@ dyn_async! {
    pub async fn test_portal_beacon_interop<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        // todo: remove this once we implement role in hivesim-rs
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         let environment = Some(HashMap::from([PortalNetwork::as_environment_flag([PortalNetwork::Beacon])]));
         let environments = Some(vec![environment.clone(), environment]);

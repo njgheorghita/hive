@@ -13,13 +13,27 @@ pub struct StartNodeResponse {
 // ClientMetadata is part of the ClientDefinition and lists metadata
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ClientMetadata {
+    //pub roles: Vec<Role>,
     pub roles: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Role {
+    Regular,
+    HistoryBridge,
+}
+
+impl Default for Role {
+    fn default() -> Self {
+        Role::Regular
+    }
 }
 
 // ClientDefinition is served by the /clients API endpoint to list the available clients
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ClientDefinition {
     pub name: String,
+    pub role: Role,
     pub version: String,
     pub meta: ClientMetadata,
 }

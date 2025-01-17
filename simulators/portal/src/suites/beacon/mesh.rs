@@ -1,6 +1,5 @@
 use crate::suites::beacon::constants::{
     CONSTANT_CONTENT_KEY, CONSTANT_CONTENT_VALUE, PRIVATE_KEY_ENVIRONMENT_VARIABLE,
-    TRIN_BRIDGE_CLIENT_TYPE,
 };
 use crate::suites::environment::PortalNetwork;
 use alloy_primitives::Bytes;
@@ -8,7 +7,7 @@ use ethportal_api::jsonrpsee::core::__reexports::serde_json;
 use ethportal_api::types::distance::{Metric, XorMetric};
 use ethportal_api::types::portal::FindContentInfo;
 use ethportal_api::{BeaconContentKey, BeaconNetworkApiClient, Discv5ApiClient};
-use hivesim::types::ClientDefinition;
+use hivesim::types::{ClientDefinition, Role};
 use hivesim::{dyn_async, Client, NClientTestSpec, Test};
 use itertools::Itertools;
 use serde_json::json;
@@ -19,8 +18,7 @@ dyn_async! {
    pub async fn test_portal_beacon_mesh<'a> (test: &'a mut Test, _client: Option<Client>) {
         // Get all available portal clients
         let clients = test.sim.client_types().await;
-        // todo: remove this once we implement role in hivesim-rs
-        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| client.name != *TRIN_BRIDGE_CLIENT_TYPE).collect();
+        let clients: Vec<ClientDefinition> = clients.into_iter().filter(|client| matches!(client.role, Role::Regular)).collect();
 
         let environment_flag = PortalNetwork::as_environment_flag([PortalNetwork::Beacon]);
 

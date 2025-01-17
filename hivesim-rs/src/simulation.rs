@@ -22,14 +22,14 @@ impl Default for Simulation {
 // it is used to pass information to the Hive Simulators
 #[derive(serde::Serialize, serde::Deserialize)]
 struct SimulatorConfig {
-    client: String,
+    client_name: String,
     environment: HashMap<String, String>,
 }
 
 impl SimulatorConfig {
     pub fn new() -> Self {
         Self {
-            client: "".to_string(),
+            client_name: Default::default(),
             environment: Default::default(),
         }
     }
@@ -131,14 +131,14 @@ impl Simulation {
         &self,
         test_suite: SuiteID,
         test: TestID,
-        client_type: String,
+        client_name: String,
         environment: Option<HashMap<String, String>>,
     ) -> (String, IpAddr) {
         let url = format!("{}/testsuite/{}/test/{}/node", self.url, test_suite, test);
         let client = reqwest::Client::new();
 
         let mut config = SimulatorConfig::new();
-        config.client = client_type;
+        config.client_name = client_name;
         if let Some(environment) = environment {
             config.environment = environment;
         }

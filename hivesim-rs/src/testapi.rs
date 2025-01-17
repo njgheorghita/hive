@@ -1,4 +1,4 @@
-use crate::types::{ClientDefinition, SuiteID, TestID, TestResult};
+use crate::types::{ClientDefinition, Role, SuiteID, TestID, TestResult};
 use crate::Simulation;
 use ::std::{boxed::Box, future::Future, pin::Pin};
 use async_trait::async_trait;
@@ -61,7 +61,9 @@ impl Suite {
 /// Represents a running client.
 #[derive(Debug, Clone)]
 pub struct Client {
-    pub kind: String,
+    // todo: make ClientType an enum
+    pub name: String,
+    pub role: Role,
     pub container: String,
     pub ip: IpAddr,
     pub rpc: HttpClient,
@@ -90,17 +92,13 @@ pub struct Test {
 impl Test {
     pub async fn start_client(
         &self,
-        client_type: String,
+        name: String,
+        role: Role,
         environment: Option<HashMap<String, String>>,
     ) -> Client {
         let (container, ip) = self
             .sim
-            .start_client(
-                self.suite_id,
-                self.test_id,
-                client_type.clone(),
-                environment,
-            )
+            .start_client(self.suite_id, self.test_id, name.clone(), environment)
             .await;
 
         let rpc_url = format!("http://{}:8545", ip);
@@ -110,7 +108,8 @@ impl Test {
             .expect("Failed to build rpc_client");
 
         Client {
-            kind: client_type,
+            name,
+            role,
             container,
             ip,
             rpc: rpc_client,
@@ -280,7 +279,10 @@ async fn run_n_client_test<T: Send + 'static>(
             let mut client_vec: Vec<Client> = Vec::new();
             let env_iter = environments.unwrap_or(vec![None; clients.len()]);
             for (client, environment) in clients.into_iter().zip(env_iter) {
-                client_vec.push(test.start_client(client.name.to_owned(), environment).await);
+                client_vec.push(
+                    test.start_client(client.name, client.role, environment)
+                        .await,
+                );
             }
             (func)(client_vec, test_data).await;
         })
